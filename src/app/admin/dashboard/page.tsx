@@ -1,11 +1,13 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
-import { Settings, LogOut, Users, FileText, Palette, Image as ImageIcon, CheckCircle } from "lucide-react";
+import { Settings, LogOut, Users, FileText, Palette, CheckCircle } from "lucide-react";
+import dynamic from "next/dynamic";
 
-export default function AdminDashboard() {
+function AdminDashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -269,3 +271,5 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
+export default dynamic(() => Promise.resolve(AdminDashboard), { ssr: false });
