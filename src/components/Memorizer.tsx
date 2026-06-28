@@ -5,7 +5,7 @@ import { useQuranStore } from "@/store/useQuranStore";
 import { RECITERS, SURAHS } from "@/lib/constants";
 import { BACKGROUNDS } from "@/lib/backgrounds";
 import YoutubeBackground from "@/components/YoutubeBackground";
-import { Play, Pause, RotateCcw, Maximize, Minimize, Settings, ImageIcon, BookOpen, ListPlus, X } from "lucide-react";
+import { Play, Pause, RotateCcw, Maximize, Minimize, Settings, ImageIcon, BookOpen, ListPlus, X, Clock } from "lucide-react";
 
 export default function Memorizer() {
   const {
@@ -35,10 +35,10 @@ export default function Memorizer() {
     customBackgroundUrl,
     customBackgroundType,
     setCustomBackground,
-    playlistSurahs,
     isPlaylistMode,
     setPlaylistSurahs,
-    setIsPlaylistMode
+    setIsPlaylistMode,
+    setIsPrayerModalOpen
   } = useQuranStore();
 
   const [surahData, setSurahData] = useState<any>(null);
@@ -50,6 +50,7 @@ export default function Memorizer() {
   const [activeBackgroundBlur, setActiveBackgroundBlur] = useState(false);
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const basmalahPlayedRef = useRef(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -143,6 +144,10 @@ export default function Memorizer() {
     return ayah ? ayah.page : 1;
   }, [surahData, currentVerse]);
 
+  useEffect(() => {
+    basmalahPlayedRef.current = false;
+  }, [surahId]);
+
   // Audio Playback Logic
   useEffect(() => {
     if (!surahData || !surahData.ayahs) return;
@@ -151,19 +156,39 @@ export default function Memorizer() {
     if (!ayah || !ayah.audio) return; // Finished surah potentially or no audio
 
     if (!audioRef.current) {
-      audioRef.current = new Audio(ayah.audio);
-      audioRef.current.dataset.currentAudio = ayah.audio;
-    } else {
-      // Only change source if it's a new ayah
-      if (audioRef.current.dataset.currentAudio !== ayah.audio) {
-        audioRef.current.src = ayah.audio;
-        audioRef.current.dataset.currentAudio = ayah.audio;
-      }
+      audioRef.current = new Audio();
     }
 
     const audio = audioRef.current;
 
+    // Determine if we need to play Basmalah first
+    const needsBasmalah = currentVerse === 1 && surahId !== 1 && surahId !== 9 && !basmalahPlayedRef.current;
+
+    if (needsBasmalah) {
+      // Create Basmalah URL by replacing the ayah number with 1
+      const basmalahUrl = ayah.audio.split('/').slice(0, -1).join('/') + '/1.mp3';
+      if (audio.dataset.currentAudio !== 'basmalah') {
+        audio.src = basmalahUrl;
+        audio.dataset.currentAudio = 'basmalah';
+      }
+    } else {
+      if (audio.dataset.currentAudio !== ayah.audio) {
+        audio.src = ayah.audio;
+        audio.dataset.currentAudio = ayah.audio;
+      }
+    }
+
     const handleEnded = () => {
+      if (audio.dataset.currentAudio === 'basmalah') {
+        basmalahPlayedRef.current = true;
+        audio.src = ayah.audio;
+        audio.dataset.currentAudio = ayah.audio;
+        if (isPlaying) {
+          audio.play().catch(e => console.error("Error playing after basmalah:", e));
+        }
+        return;
+      }
+
       if (currentRepeatProgress + 1 < repeatCount) {
         incrementRepeatProgress();
         audio.currentTime = 0;
@@ -294,6 +319,15 @@ export default function Memorizer() {
           >
             <ListPlus size={18} />
             <span className="text-sm font-medium hidden sm:inline">قائمة السور</span>
+          </button>
+
+          <button
+            onClick={() => setIsPrayerModalOpen(true)}
+            className="p-2 rounded-lg border flex items-center gap-2 transition-colors bg-background hover:bg-muted"
+            title="أوقات الصلاة"
+          >
+            <Clock size={18} className="text-primary" />
+            <span className="text-sm font-medium hidden sm:inline">أوقات الصلاة</span>
           </button>
 
           <select 

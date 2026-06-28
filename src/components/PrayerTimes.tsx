@@ -19,8 +19,9 @@ export default function PrayerTimes() {
   const [timings, setTimings] = useState<Record<string, string> | null>(null);
   const [activeAdhan, setActiveAdhan] = useState<string | null>(null);
   const adhanAudioRef = useRef<HTMLAudioElement | null>(null);
-  const { isPlaying, setIsPlaying } = useQuranStore();
-  const [wasPlayingBeforeAdhan, setWasPlayingBeforeAdhan] = useState(false);
+  const { isPlaying, setIsPlaying, isPrayerModalOpen, setIsPrayerModalOpen } = useQuranStore();
+  const wasPlayingRef = useRef(false);
+  const [showDua, setShowDua] = useState(false);
 
   // 1. Get Geolocation & Fetch Timings
   useEffect(() => {
@@ -73,7 +74,7 @@ export default function PrayerTimes() {
   }, [timings, activeAdhan]);
 
   const triggerAdhan = (prayer: string) => {
-    setWasPlayingBeforeAdhan(isPlaying);
+    wasPlayingRef.current = isPlaying;
     if (isPlaying) {
       setIsPlaying(false);
     }
@@ -86,16 +87,26 @@ export default function PrayerTimes() {
     
     adhanAudioRef.current.onended = () => {
       setActiveAdhan(null);
-      if (wasPlayingBeforeAdhan) {
-        setIsPlaying(true);
-      }
+      setShowDua(true);
+      
+      // Auto close Dua after 15 seconds
+      setTimeout(() => {
+        // Only if it's still showing (user didn't manually close)
+        setShowDua(prev => {
+          if (prev) {
+            if (wasPlayingRef.current) setIsPlaying(true);
+            return false;
+          }
+          return prev;
+        });
+      }, 15000);
     };
 
     adhanAudioRef.current.play().catch(e => {
       console.error("Could not play Adhan:", e);
       // Auto close if playback failed
       setActiveAdhan(null);
-      if (wasPlayingBeforeAdhan) setIsPlaying(true);
+      if (wasPlayingRef.current) setIsPlaying(true);
     });
   };
 
@@ -106,16 +117,68 @@ export default function PrayerTimes() {
       adhanAudioRef.current.currentTime = 0;
     }
     setActiveAdhan(null);
-    if (wasPlayingBeforeAdhan) {
+    if (wasPlayingRef.current) {
       setIsPlaying(true);
     }
   };
 
+  if (showDua) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-500 p-4">
+        <div className="bg-card border-2 border-primary p-8 md:p-12 rounded-3xl shadow-2xl text-center max-w-2xl w-full mx-auto space-y-6">
+          <h2 className="text-3xl font-bold text-primary">دعاء ما بعد الأذان</h2>
+          <p className="text-2xl md:text-3xl text-foreground leading-relaxed font-arabic py-4">
+            اللَّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ، وَالصَّلَاةِ الْقَائِمَةِ، آتِ مُحَمَّداً الْوَسِيلَةَ وَالْفَضِيلَةَ، وَابْعَثْهُ مَقَاماً مَحْمُوداً الَّذِي وَعَدْتَهُ.
+          </p>
+          <button 
+            onClick={() => {
+              setShowDua(false);
+              if (wasPlayingRef.current) setIsPlaying(true);
+            }}
+            className="mt-8 bg-primary text-primary-foreground px-8 py-3 rounded-full hover:bg-primary/90 transition text-lg font-bold"
+          >
+            متابعة التلاوة
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isPrayerModalOpen) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in zoom-in duration-300 p-4">
+        <div className="bg-card border border-border p-6 md:p-8 rounded-3xl shadow-2xl max-w-md w-full relative">
+          <button 
+            onClick={() => setIsPrayerModalOpen(false)}
+            className="absolute top-4 left-4 p-2 bg-muted hover:bg-destructive hover:text-destructive-foreground rounded-full transition"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+
+          <h2 className="text-2xl font-bold text-center text-primary mb-6">أوقات الصلاة</h2>
+          
+          {!timings ? (
+            <p className="text-center text-muted-foreground py-8">جاري تحديد الموقع...</p>
+          ) : (
+            <div className="space-y-3">
+              {PRAYERS.map(prayer => (
+                <div key={prayer} className="flex justify-between items-center p-4 bg-muted/50 rounded-2xl hover:bg-primary/10 transition-colors">
+                  <span className="font-bold text-lg">{PRAYER_NAMES[prayer]}</span>
+                  <span className="text-xl font-mono text-primary" dir="ltr">{timings[prayer]}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   if (!activeAdhan) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-500">
-      <div className="bg-card border-2 border-primary p-8 md:p-12 rounded-3xl shadow-2xl text-center max-w-lg w-full mx-4 space-y-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-500 p-4">
+      <div className="bg-card border-2 border-primary p-8 md:p-12 rounded-3xl shadow-2xl text-center max-w-lg w-full mx-auto space-y-6">
         <div className="w-24 h-24 mx-auto bg-primary/20 text-primary rounded-full flex items-center justify-center mb-6">
           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 2a3 3 0 0 1 3 3v1h-6V5a3 3 0 0 1 3-3Z"/>
@@ -132,7 +195,7 @@ export default function PrayerTimes() {
         </p>
 
         <p className="text-sm text-muted-foreground mt-4 opacity-75">
-          تم إيقاف التلاوة مؤقتاً، وستستأنف تلقائياً بعد انتهاء الأذان
+          تم إيقاف التلاوة مؤقتاً، وستستأنف تلقائياً بعد الأذان والدعاء
         </p>
 
         <button 

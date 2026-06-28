@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Tajawal, Amiri } from "next/font/google";
 import "./globals.css";
 import PrayerTimes from "@/components/PrayerTimes";
+import AzkarNotifications from "@/components/AzkarNotifications";
+import SiteSettingsProvider from "@/components/SiteSettingsProvider";
 
 const tajawal = Tajawal({
   subsets: ["arabic"],
@@ -32,9 +34,12 @@ export default function RootLayout({
         className={`${tajawal.variable} ${amiri.variable} font-tajawal antialiased min-h-screen bg-background text-foreground flex flex-col`}
       >
         <PrayerTimes />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
-          {children}
-        </main>
+        <AzkarNotifications />
+        <SiteSettingsProvider>
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+            {children}
+          </main>
+        </SiteSettingsProvider>
         
         <footer className="w-full py-8 text-center bg-card/50 border-t border-border mt-auto">
           <div className="max-w-3xl mx-auto px-4">

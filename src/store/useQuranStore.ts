@@ -17,6 +17,7 @@ interface QuranState {
   customBackgroundType: 'image' | 'video' | null;
   playlistSurahs: number[];
   isPlaylistMode: boolean;
+  isPrayerModalOpen: boolean;
 
   setReciter: (id: string) => void;
   setSurah: (id: number) => void;
@@ -33,6 +34,7 @@ interface QuranState {
   setCustomBackground: (url: string | null, type: 'image' | 'video' | null) => void;
   setPlaylistSurahs: (surahs: number[]) => void;
   setIsPlaylistMode: (enabled: boolean) => void;
+  setIsPrayerModalOpen: (isOpen: boolean) => void;
 }
 
 export const useQuranStore = create<QuranState>()(
@@ -53,6 +55,7 @@ export const useQuranStore = create<QuranState>()(
       customBackgroundType: null,
       playlistSurahs: [],
       isPlaylistMode: false,
+      isPrayerModalOpen: false,
 
       setReciter: (id) => set({ reciterId: id, currentVerse: 1, currentRepeatProgress: 0 }),
       setSurah: (id) => set({ surahId: id, currentVerse: 1, currentRepeatProgress: 0 }),
@@ -70,6 +73,7 @@ export const useQuranStore = create<QuranState>()(
       setCustomBackground: (url, type) => set({ customBackgroundUrl: url, customBackgroundType: type }),
       setPlaylistSurahs: (surahs) => set({ playlistSurahs: surahs }),
       setIsPlaylistMode: (enabled) => set({ isPlaylistMode: enabled }),
+      setIsPrayerModalOpen: (isOpen) => set({ isPrayerModalOpen: isOpen }),
     }),
     {
       name: 'quran-memorization-storage',

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Play, Settings, BookOpen } from "lucide-react";
+import { Play, Settings, BookOpen, Clock } from "lucide-react";
 import Memorizer from "@/components/Memorizer";
+import { useQuranStore } from "@/store/useQuranStore";
 
 export default function Home() {
   const [showApp, setShowApp] = useState(false);
@@ -48,12 +49,30 @@ export default function Home() {
         </div>
       </div>
 
-      <button 
-        onClick={() => setShowApp(true)}
-        className="mt-8 px-8 py-4 bg-primary text-primary-foreground font-bold text-xl rounded-full shadow-lg hover:bg-primary/90 transition transform hover:-translate-y-1"
-      >
-        ابدأ التحفيظ الآن
-      </button>
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
+        <button
+          onClick={() => setShowApp(true)}
+          className="group relative inline-flex items-center justify-center px-8 py-4 font-bold text-white transition-all duration-200 bg-primary font-pj rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary hover:bg-primary/90 hover:-translate-y-1 w-full sm:w-auto"
+        >
+          <Play className="w-6 h-6 ml-2 animate-pulse" />
+          <span>ابدأ الحفظ الآن</span>
+        </button>
+        
+        <button
+          onClick={() => {
+            // We need to show the app first to mount the store effectively or we can just open modal
+            setShowApp(true);
+            // Small delay to let Memorizer mount and sync store if needed
+            setTimeout(() => {
+              useQuranStore.getState().setIsPrayerModalOpen(true);
+            }, 100);
+          }}
+          className="group relative inline-flex items-center justify-center px-8 py-4 font-bold text-primary transition-all duration-200 bg-primary/10 border-2 border-primary/20 font-pj rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary hover:bg-primary/20 w-full sm:w-auto"
+        >
+          <Clock className="w-6 h-6 ml-2" />
+          <span>أوقات الصلاة</span>
+        </button>
+      </div>
     </div>
   );
 }
