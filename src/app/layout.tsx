@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { Tajawal, Amiri } from "next/font/google";
 import "./globals.css";
-import PrayerTimes from "@/components/PrayerTimes";
-import AzkarNotifications from "@/components/AzkarNotifications";
+import dynamic from "next/dynamic";
 import SiteSettingsProvider from "@/components/SiteSettingsProvider";
+
+// تعطيل الريندر في السيرفر للميزات التي تعتمد على المتصفح
+const PrayerTimes = dynamic(() => import("@/components/PrayerTimes"), { ssr: false });
+const AzkarNotifications = dynamic(() => import("@/components/AzkarNotifications"), { ssr: false });
 
 const tajawal = Tajawal({
   subsets: ["arabic"],
