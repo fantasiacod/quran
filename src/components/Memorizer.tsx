@@ -35,7 +35,8 @@ export default function Memorizer() {
     customBackgroundUrl,
     customBackgroundType,
     setCustomBackground,
-    isPlaylistMode,
+       isPlaylistMode,
+    playlistSurahs,
     setPlaylistSurahs,
     setIsPlaylistMode,
     setIsPrayerModalOpen
