@@ -1,5 +1,4 @@
 "use client";
-
 import dynamic from "next/dynamic";
 
 const PrayerTimes = dynamic(() => import("@/components/PrayerTimes"), { ssr: false });
