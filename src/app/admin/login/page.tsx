@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 
-export default function AdminLogin() {
+function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -86,3 +87,5 @@ export default function AdminLogin() {
     </div>
   );
 }
+
+export default dynamic(() => Promise.resolve(AdminLogin), { ssr: false });
