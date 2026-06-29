@@ -11,8 +11,10 @@ function getSupabase(): SupabaseClient {
   return _supabase;
 }
 
+// Proxy so existing code that calls supabase.from(...) still works
 export const supabase = new Proxy({} as SupabaseClient, {
   get(_target, prop) {
     return (getSupabase() as unknown as Record<string | symbol, unknown>)[prop];
   },
 });
+

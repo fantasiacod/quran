@@ -38,10 +38,11 @@ export default function RootLayout({
             {children}
           </main>
         </SiteSettingsProvider>
+        
         <footer className="w-full py-8 text-center bg-card/50 border-t border-border mt-auto">
           <div className="max-w-3xl mx-auto px-4">
             <p className="font-amiri text-xl text-primary/80 leading-loose">
-              صدقة جارية لي ولوالديّ ولزوجتي ولكل من مر من هنا
+              « صدقة جارية لي ولوالديّ ولزوجتي ولكل من مر من هنا »
             </p>
             <p className="text-sm text-muted-foreground mt-2">
               نسأل الله القبول ولكم الأجر والمثوبة
